@@ -1,0 +1,9 @@
+__pycache__
+*.ipynb_checkpoints
+
+data/index
+data/face_db.db
+data/*/*.jpg
+!/data/test_images/215069.jpg
+
+test/__pycache__
