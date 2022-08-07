@@ -14,7 +14,7 @@
 リポジトリをクローンし, ./face_search/data/first_upload_images にディレクトリを作り ID名.jpg の形式で画像を保存. ここにある画像は最初 (docker run) から登録される.
 <br>ディレクトリ face_search に移動 Dockerfile より build.
 ```bash
-git clone https://github.com/sojiro-otsubo/face_search.git
+git clone https://github.com/sojiro-otsubo/face-search.git
 # ./face_search/data/first_upload_imagesディレクトリを作る
 # ./face_search/data/first_upload_images に画像追加
 cd face_search
