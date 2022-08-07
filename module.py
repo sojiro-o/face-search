@@ -19,13 +19,13 @@ def get_vector(file):
 		return 'Sorry I could not detect the face from this image'
 
 
-def ngt_search(file, ngt_index_path):
+def ngt_search(file):
 	# filerequest.files['file']で受け取るオブジェクト
 	vector = get_vector(file)
 	if type(vector) is str:
 		return vector # 'Sorry I could not detect the face from this image'
 	
-	ngt_index = ngtpy.Index(ngt_index_path, zero_based_numbering=False)
+	ngt_index = ngtpy.Index(b'./data/index', zero_based_numbering=False)
 	face_db = sqlite3.connect('./data/face_db.db')
 	cur_face_db = face_db.cursor()
 	size = 10 # 上位10人まで検索
@@ -39,7 +39,6 @@ def ngt_search(file, ngt_index_path):
 	face_db.close()
 
 	return ID_of_similar
-
 
 def register(ID, file):
 	# file: request.files['file']で受け取ったオブジェクト
@@ -60,13 +59,14 @@ def register(ID, file):
 		img = Image.open(file)
 		img.save("./data/storage/{}.jpg".format(ID)) # 画像を保存
 		
-		if not os.path.isfile('./data/index'):
+		if not os.path.isfile(b'./data/index'):
 			# ngtのindexがない場合は作る
-			ngtpy.create(path='./data/index', dimension=128, distance_type="L2")
-		index = ngtpy.Index('./data/index', zero_based_numbering=False)
+			ngtpy.create(path=b'./data/index', dimension=128, distance_type="L2")
+		index = ngtpy.Index(b'./data/index', zero_based_numbering=False)
 		index.insert(vector.tolist()) # リスト型に変更
 		index.build_index() 
 		index.save() # indexに登録
+		index.close()
 		face_db.execute("INSERT INTO face_db(ID) values(?)", (str(ID),))
 		face_db.commit() # DBにも挿入
 		face_db.close()
@@ -74,46 +74,49 @@ def register(ID, file):
 
 
 def register_folder(folder):
-    # folder: ID.jpgの形式で画像が格納されたディレクトリパス
-    failed_list = [] # 顔の認識ができず取り込みが失敗した画像ID名
-    already_registered = []
+	# folder: ID.jpgの形式で画像が格納されたディレクトリパス
+	failed_list = [] # 顔の認識ができず取り込みが失敗した画像ID名
+	already_registered = []
 
-    objects = [] # 登録するベクトルをまとめたリスト
-    face_db = sqlite3.connect('./data/face_db.db')
-    cur_face_db = face_db.cursor()
-    files = os.listdir(folder)
+	objects = [] # 登録するベクトルをまとめたリスト
+	face_db = sqlite3.connect('./data/face_db.db')
+	cur_face_db = face_db.cursor()
+	files = os.listdir(folder)
 
-    if not os.path.isfile('./data/index'):
-        # ngtのindexがない場合は作る
-        ngtpy.create(path='./data/index', dimension=128, distance_type="L2")
-    index = ngtpy.Index('./data/index', zero_based_numbering=False)
+	if not os.path.isfile(b'./data/index'):
+		# ngtのindexがない場合は作る
+		ngtpy.create(path=b'./data/index', dimension=128, distance_type="L2")
+	index = ngtpy.Index(b'./data/index', zero_based_numbering=False)
 
-    for file in tqdm(files):
-        ID = os.path.splitext(os.path.basename(file))[0]
-        cur_face_db.execute("SELECT COUNT(*) FROM face_db WHERE ID = (?)", (str(ID),)) # 検索の実行
-        
-        if cur_face_db.fetchone()[0] == 1:
-            # IDが既に存在する場合
-            already_registered.append(ID)
-            continue
-        
-        # 新たに登録する場合
-        vector = get_vector("{}/{}".format(folder, file))
-        if type(vector) is str:
-            # 顔認識が失敗した場合
-            failed_list.append(ID)
-            continue 
-        
-        # 要変更
-        img = Image.open("{}/{}".format(folder, file))
-        img.save("./data/storage/{}.jpg".format(ID)) # 画像を保存
+	for file in tqdm(files):
+		ID = os.path.splitext(os.path.basename(file))[0]
+		cur_face_db.execute("SELECT COUNT(*) FROM face_db WHERE ID = (?)", (str(ID),)) # 検索の実行
+		
+		if cur_face_db.fetchone()[0] == 1:
+			# IDが既に存在する場合
+			already_registered.append(ID)
+			continue
+		
+		# 新たに登録する場合
+		vector = get_vector("{}/{}".format(folder, file))
+		if type(vector) is str:
+			# 顔認識が失敗した場合
+			failed_list.append(ID)
+			continue 
+		
+		# 要変更
+		img = Image.open("{}/{}".format(folder, file))
+		img.save("./data/storage/{}.jpg".format(ID)) # 画像を保存
 
-        objects.append(vector.tolist())
-        cur_face_db.execute("INSERT INTO face_db(ID) values(?)", (str(ID),)) # DBにはIDのみ挿入
-    if len(objects):
-        index.batch_insert(objects) # indexにobjectsを挿入
-    index.save()
-    face_db.commit() # DBの更新を保存
-    face_db.close()
-    print("already registered", *already_registered)
-    print("can not save:", *failed_list)
+		objects.append(vector.tolist())
+		cur_face_db.execute("INSERT INTO face_db(ID) values(?)", (str(ID),)) # DBにはIDのみ挿入
+
+	if len(objects) >= 1:
+		index.batch_insert(objects) # indexにobjectsを挿入
+
+	index.save()
+	index.close()
+	face_db.commit() # DBの更新を保存
+	face_db.close()
+	print("already registered", *already_registered)
+	print("can not save:", *failed_list)

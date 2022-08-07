@@ -4,6 +4,6 @@ __pycache__
 data/index
 data/face_db.db
 data/*/*.jpg
-!/data/test_images/215069.jpg
-
+!/data/test_images/*.jpg
+!/data/readme/*.jpg
 test/__pycache__

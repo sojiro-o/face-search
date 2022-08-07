@@ -34,7 +34,7 @@ def process():
             file = request.files['file']
             if (not file.mimetype=="image/jpeg") and (not file.mimetype=="image/png"):
                 return jsonify(status="error", message='Only jpg,png files are supported')
-            ngt_list = ngt_search(file, './data/index')
+            ngt_list = ngt_search(file)
             return jsonify(status="ok", result=ngt_list)
         except:
             return jsonify(status="error", message='An unexpected error has occurred')
