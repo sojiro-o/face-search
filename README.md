@@ -1,4 +1,4 @@
-# Face Search
+# face search
 <div align="center">
 <img src="./data/readme/title.png" width="80%">
 </div>
