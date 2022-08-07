@@ -11,13 +11,13 @@
 [face_recognition](https://github.com/ageitgey/face_recognition) と [ngt](https://github.com/yahoojapan/NGT/blob/master/python/README-ngtpy-jp.md) を利用したそっくりさん検索API
 
 ## 🐋 準備
-リポジトリをクローンし, ./face_search/data/first_upload_images にディレクトリを作り ID名.jpg の形式で画像を保存. ここにある画像は最初 (docker run) から登録される.
-<br>ディレクトリ face_search に移動 Dockerfile より build.
+リポジトリをクローンし, ./face-search/data/first_upload_images にディレクトリを作り ID名.jpg の形式で画像を保存. ここにある画像は最初 (docker run) から登録される.
+<br>ディレクトリ face-search に移動 Dockerfile より build.
 ```bash
 git clone https://github.com/sojiro-otsubo/face-search.git
-# ./face_search/data/first_upload_imagesディレクトリを作る
-# ./face_search/data/first_upload_images に画像追加
-cd face_search
+# ./face-search/data/first_upload_imagesディレクトリを作る
+# ./face-search/data/first_upload_images に画像追加
+cd face-search
 docker build -t api_test .
 ```
 
