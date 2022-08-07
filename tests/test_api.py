@@ -41,7 +41,7 @@ class TestFlasker(unittest.TestCase):
         assert get_response.status_code == 200
     
     def test_07_upload_jpg_post(self):
-        with open("./data/test_images/215068.jpg", 'rb') as f:
+        with open("./data/test_images/215069.jpg", 'rb') as f:
             binary = f.read()
         post_response = self.app.post("/upload", data={"file" :  (io.BytesIO(binary), "test.jpg")}, content_type='multipart/form-data')
         assert post_response.status_code == 200
